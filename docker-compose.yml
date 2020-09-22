@@ -1,0 +1,28 @@
+version: '3'
+services:
+  influxdb:
+    build: influxdb
+    ports:
+      # bind container ports to localhost
+      # port of influxdb
+      - '8086:8086'
+      # port for Graphite
+      - '2003:2003'
+    volumes:
+      # mount volues to preserve data on Docker stop/restart
+      - influxdb-storage:/var/lib/influxdb
+  grafana:
+    build: grafana
+    ports:
+      # bind container ports to localhost
+      # port for Grafana
+      - '3000:3000'
+    links:
+      - influxdb
+    volumes:
+      # mount volues to preserve data on Docker stop/restart
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  influxdb-storage:
+  grafana-storage:
