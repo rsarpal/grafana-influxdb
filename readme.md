@@ -1,4 +1,4 @@
-#Summary
+##Summary
 
 
 #verify Data in influx DB
@@ -15,7 +15,26 @@
   - INFLUXDB_ADMIN_PASSWORD - DB admin password
 
 #### Influxdb Conf File
-  -
+  - Gatling add below section to the config file to enable Graphite and Gating
+  ```[[graphite]]
+    # Determines whether the graphite endpoint is enabled.
+    enabled = true
+    database = "gatlingdb"
+    retention-policy = ""
+    bind-address = ":2003"
+    protocol = "tcp"
+    consistency-level = "one"
+    batch-size = 5000
+    batch-pending = 10
+    batch-timeout = "1s"
+    udp-read-buffer = 0
+    separator = "."
+
+    templates = [
+                  "gatling.*.*.*.* measurement.simulation.request.status.field",
+                  "gatling.*.users.*.* measurement.simulation.measurement.request.field"
+          ]
+  ```
 
 #### Grafana Environment variables
   - GF_SECURITY_ADMIN_USER - user account
@@ -29,8 +48,8 @@
 ## Gatling Configuration
 
 #### Gatling.conf
-  - enable
-    graphite {
+  - enable below in gatling.conf file
+    ```graphite {
        light = false              # only send the all* stats
        host = "localhost"         # The host where the Carbon server is located
        port = 2003                # The port to which the Carbon server listens to (2003 is default for plaintext, 2004 is default for pickle)
@@ -39,3 +58,4 @@
        bufferSize = 8192          # Internal data buffer size, in bytes
        writePeriod = 1            # Write period, in seconds
      }
+     ```
