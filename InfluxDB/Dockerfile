@@ -1,12 +1,14 @@
 FROM influxdb:latest
 
+RUN apt-get update
+
 # set Influxdb env variables
 ENV INFLUXDB_DB=gatlingdb
 ENV INFLUXDB_ADMIN_USER=admin
 ENV INFLUXDB_ADMIN_PASSWORD=p4ssw0rd
 
-# expose influxdb port 8086 and Graphite 2003 default port
-EXPOSE 8086 2003
+# expose influxdb port 8086 and Graphite 2003 default port for Gatling and 2004 for Jmeter
+EXPOSE 8086 2003 2004
 
 COPY influxdb.conf /usr/local/etc/influxdb.conf
 

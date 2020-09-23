@@ -1,8 +1,19 @@
 ##Summary
+Grafana and InfluxDB setup to support Jmeter and Gatling. The setup allows live graphs and monitoring facility in Grafana for Gatling and Jmeter
 
+ - Influxdb Docker : This docker creates "jmeter" and "gatlingdb" in InfluxDB.
+    - Jmeter uses Graphite port 2004
+    - Galing uses Graphite port 2003
+    - InfluxDB uses 8086 port
 
-#verify Data in influx DB
-  - $ influx -database 'gatlingdb' -execute 'SELECT * FROM gatling where count != 0 LIMIT 10'
+ - Grafana Docker  : Starts Grafana on port 3000
+
+##verify Data in influx DB
+  - Show Databases : curl -i -XPOST http://localhost:8086/query --data-urlencode "q=show databases"
+  - Select Queries :
+      - curl -i -XPOST http://localhost:8086/query --data-urlencode "q=SELECT * FROM “jmeter.all.a.avg”"
+      - curl -i -XPOST http://localhost:8086/query --data-urlencode "q=SELECT * FROM gatling where count != 0 LIMIT 10"
+      - $ influx -database 'gatlingdb' -execute 'SELECT * FROM gatling where count != 0 LIMIT 10'
 
 ## Docker Setup
 #### Requirements
@@ -15,8 +26,9 @@
   - INFLUXDB_ADMIN_PASSWORD - DB admin password
 
 #### Influxdb Conf File
-  - Gatling add below section to the config file to enable Graphite and Gating
-  ```[[graphite]]
+  - Gatling add below section to the config file to enable Graphite (port 2003) and Gating
+  ```
+  [[graphite]]
     # Determines whether the graphite endpoint is enabled.
     enabled = true
     database = "gatlingdb"
@@ -36,6 +48,24 @@
           ]
   ```
 
+  - Jmeter add below section to the config file to enable Graphite (port 2004) and Jmeter
+
+  ```
+  [graphite]]
+    # Determines whether the graphite endpoint is enabled.
+    enabled = true
+    database = "jmeter"
+    retention-policy = ""
+    bind-address = ":2004"
+    protocol = "tcp"
+    consistency-level = "one"
+    batch-size = 5000
+    batch-pending = 10
+    batch-timeout = "1s"
+    udp-read-buffer = 0
+    separator = "."
+  ```
+
 #### Grafana Environment variables
   - GF_SECURITY_ADMIN_USER - user account
   - GF_SECURITY_ADMIN_PASSWORD - password
@@ -49,7 +79,9 @@
 
 #### Gatling.conf
   - enable below in gatling.conf file
-    ```graphite {
+
+    ```
+    graphite {
        light = false              # only send the all* stats
        host = "localhost"         # The host where the Carbon server is located
        port = 2003                # The port to which the Carbon server listens to (2003 is default for plaintext, 2004 is default for pickle)
