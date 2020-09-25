@@ -1,4 +1,4 @@
-##Summary
+## Summary
 Grafana and InfluxDB setup to support Jmeter and Gatling. The setup allows live graphs and monitoring facility in Grafana for Gatling and Jmeter
 
  - Influxdb Docker : This docker creates "jmeter" and "gatlingdb" in InfluxDB.
@@ -8,7 +8,7 @@ Grafana and InfluxDB setup to support Jmeter and Gatling. The setup allows live 
 
  - Grafana Docker  : Starts Grafana on port 3000
 
-##verify Data in influx DB
+#### Verify Data in influx DB
   - Show Databases : curl -i -XPOST http://localhost:8086/query --data-urlencode "q=show databases"
   - Select Queries :
       - curl -i -XPOST http://localhost:8086/query --data-urlencode "q=SELECT * FROM “jmeter.all.a.avg”"
@@ -75,6 +75,10 @@ Grafana and InfluxDB setup to support Jmeter and Gatling. The setup allows live 
 #### Grafana Gatling Charts
   - Template - https://github.com/gatling/gatling/tree/master/src/sphinx/realtime_monitoring/code/gatling.json
 
+#### Jmeter Gatling Charts
+  - Template - https://grafana.com/grafana/dashboards/1152  (Supports only InfluxDB implementation not Graphite)
+  - Metrics - https://jmeter.apache.org/usermanual/realtime-results.html
+
 ## Gatling Configuration
 
 #### Gatling.conf
@@ -91,3 +95,6 @@ Grafana and InfluxDB setup to support Jmeter and Gatling. The setup allows live 
        writePeriod = 1            # Write period, in seconds
      }
      ```
+
+#### Jmeter Configuration
+  - Add Listener - Backend Listener and in implementation select the GraphiteListener OR use InfluxDB Listener implementation
