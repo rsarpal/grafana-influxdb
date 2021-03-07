@@ -1,4 +1,4 @@
-FROM influxdb:latest
+FROM influxdb:1.8
 
 RUN apt-get update
 
@@ -11,6 +11,7 @@ ENV INFLUXDB_ADMIN_PASSWORD=p4ssw0rd
 EXPOSE 8086 2003 2004
 
 COPY influxdb.conf /usr/local/etc/influxdb.conf
+ENV INFLUXD_CONFIG_PATH=/usr/local/etc/influxdb.conf
 
 # setup entrypoint
 RUN mkdir /app
