@@ -10,11 +10,13 @@ services:
       - '2003:2003'
       # port for Jmeter Graphite
       - '2004:2004'
+    image: rsarpal/influxdb
     volumes:
       # mount volues to preserve data on Docker stop/restart
       - influxdb-storage:/var/lib/influxdb
   grafana:
     build: grafana
+    image: rsarpal/grafana
     ports:
       # bind container ports to localhost
       # port for Grafana
