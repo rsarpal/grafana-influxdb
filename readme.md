@@ -77,6 +77,7 @@ Grafana and InfluxDB setup to support Jmeter and Gatling. The setup allows live 
 
 #### Jmeter Gatling Charts
   - Template - https://grafana.com/grafana/dashboards/1152  (Supports only InfluxDB implementation not Graphite)
+  - Template - https://grafana.com/grafana/dashboards/4026
   - Metrics - https://jmeter.apache.org/usermanual/realtime-results.html
 
 ## Gatling Configuration
