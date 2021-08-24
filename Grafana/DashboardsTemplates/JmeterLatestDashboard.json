@@ -21,7 +21,7 @@
   "gnetId": 4026,
   "graphTooltip": 0,
   "id": 546,
-  "iteration": 1629284702971,
+  "iteration": 1629832831854,
   "links": [
     {
       "asDropdown": false,
@@ -41,13 +41,40 @@
       "asDropdown": false,
       "icon": "dashboard",
       "includeVars": false,
-      "keepTime": false,
+      "keepTime": true,
       "tags": [],
-      "targetBlank": false,
+      "targetBlank": true,
       "title": "Kubernetes Cluster",
       "tooltip": "",
       "type": "link",
       "url": "https://observe.prod.monitoring.relexsolutions.com/d/jCcnyMgMz/kubernetes-cluster-resources?"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [
+        "scale out",
+        "zookeeper"
+      ],
+      "targetBlank": true,
+      "title": "Zookeeper",
+      "tooltip": "",
+      "type": "dashboards",
+      "url": ""
+    },
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Riddler",
+      "tooltip": "",
+      "type": "link",
+      "url": "d/BJ1-fowMz/riddler-jvm"
     }
   ],
   "panels": [
@@ -1093,7 +1120,7 @@
       "percentage": false,
       "pluginVersion": "7.5.7",
       "pointradius": 2,
-      "points": false,
+      "points": true,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
@@ -1253,7 +1280,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT count(\"grpThreads\")  FROM \"$JMeterResults_tail\" WHERE  (\"label\" =~ /^$ThroughputFilter$/)  AND $timeFilter GROUP BY \"label\", time(1000ms) fill(null)",
+          "query": "SELECT count(\"grpThreads\")/($__interval_ms/1000)  FROM \"$JMeterResults_tail\" WHERE  (\"label\" =~ /^$ThroughputFilter$/)  AND $timeFilter GROUP BY \"label\", time($__interval)  fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1331,7 +1358,7 @@
           "hide": true,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT sum(\"count\")/1000  FROM \"$measurement_name\" WHERE  (\"transaction\" =~ /^$ThroughputFilter$/)  AND $timeFilter GROUP BY \"transaction\", time(1000ms) fill(null)",
+          "query": "SELECT sum(\"count\")/5 FROM \"$measurement_name\" WHERE  (\"transaction\" =~ /^$ThroughputFilter$/)  AND $timeFilter GROUP BY \"transaction\", time(5000ms) fill(null)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -1465,12 +1492,56 @@
               "type": "tag"
             }
           ],
+          "hide": false,
           "measurement": "jmeter",
           "orderByTime": "ASC",
           "policy": "default",
           "query": "SELECT mean(\"pct95.0\") FROM \"$measurement_name\" WHERE (\"statut\" = 'ok' AND \"application\" =~ /^$application$/) AND $timeFilter GROUP BY \"transaction\", time($__interval) fill(null)",
           "rawQuery": true,
           "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "pct95.0"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "statut",
+              "operator": "=",
+              "value": "ok"
+            },
+            {
+              "condition": "AND",
+              "key": "application",
+              "operator": "=~",
+              "value": "/^$application$/"
+            }
+          ]
+        },
+        {
+          "alias": "$tag_transaction",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "transaction"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": true,
+          "measurement": "jmeter",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"pct95.0\") FROM \"$measurement_name\" WHERE (\"statut\" = 'ok' AND \"application\" =~ /^$application$/ AND \"transaction\" =~ /^$ThroughputFilter$/ ) AND $timeFilter GROUP BY \"transaction\", time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
@@ -1502,7 +1573,7 @@
           "$$hashKey": "object:419",
           "colorMode": "ok",
           "fill": true,
-          "line": true,
+          "line": false,
           "op": "lt",
           "value": 500,
           "yaxis": "left"
@@ -1511,7 +1582,7 @@
           "$$hashKey": "object:420",
           "colorMode": "warning",
           "fill": false,
-          "line": true,
+          "line": false,
           "op": "gt",
           "value": 1500,
           "yaxis": "left"
@@ -1520,7 +1591,7 @@
           "$$hashKey": "object:421",
           "colorMode": "critical",
           "fill": true,
-          "line": true,
+          "line": false,
           "op": "gt",
           "value": 5000,
           "yaxis": "left"
@@ -2398,7 +2469,7 @@
           "fillGradient": 0,
           "gridPos": {
             "h": 7,
-            "w": 12,
+            "w": 8,
             "x": 0,
             "y": 42
           },
@@ -2450,12 +2521,66 @@
                   "type": "time"
                 }
               ],
+              "hide": false,
               "measurement": "jmeter",
               "orderByTime": "ASC",
               "policy": "default",
               "query": "SELECT last(\"count\") / $send_interval FROM \"$measurement_name\" WHERE (\"transaction\" =~ /^$transaction$/ AND \"statut\" = 'ok') AND $timeFilter GROUP BY time($__interval)",
               "rawQuery": true,
               "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "count"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "sum"
+                  },
+                  {
+                    "params": [
+                      "5s"
+                    ],
+                    "type": "non_negative_derivative"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "transaction",
+                  "operator": "=~",
+                  "value": "/^$transaction$/"
+                },
+                {
+                  "condition": "AND",
+                  "key": "statut",
+                  "operator": "=",
+                  "value": "ok"
+                }
+              ]
+            },
+            {
+              "alias": "Req / s",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                }
+              ],
+              "hide": true,
+              "measurement": "jmeter",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "SELECT cumulative_sum(\"count\")  FROM \"$measurement_name\" WHERE (\"transaction\" =~ /^$transaction$/ AND \"statut\" = 'ok') AND $timeFilter ",
+              "rawQuery": true,
+              "refId": "A",
               "resultFormat": "time_series",
               "select": [
                 [
@@ -2537,6 +2662,133 @@
           }
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "${data_source}",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 42
+          },
+          "hiddenSeries": false,
+          "id": 53,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.5.7",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "Cluster",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "SELECT cumulative_sum(\"count\")  FROM \"$measurement_name\" WHERE (\"transaction\" =~ /^$transaction$/ AND \"statut\" = 'ok') AND $timeFilter ",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": []
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "ClusterCount",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:238",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:239",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "aliasColors": {
             "Num of Errors": "#bf1b00",
             "num of errors": "#bf1b00"
@@ -2554,8 +2806,8 @@
           "fillGradient": 0,
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 12,
+            "w": 8,
+            "x": 16,
             "y": 42
           },
           "hiddenSeries": false,
@@ -3547,7 +3799,7 @@
       "type": "table"
     }
   ],
-  "refresh": "5s",
+  "refresh": false,
   "schemaVersion": 27,
   "style": "dark",
   "tags": [
@@ -3628,8 +3880,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "CL04_DeleteCluster",
-          "value": "CL04_DeleteCluster"
+          "text": "CL01_CreateCluster",
+          "value": "CL01_CreateCluster"
         },
         "datasource": "$data_source",
         "definition": "SHOW TAG VALUES FROM \"$measurement_name\" WITH KEY = \"transaction\" WHERE \"application\" =~ /^$application$/ AND \"transaction\" != 'internal' AND \"transaction\" != 'all'",
@@ -3665,7 +3917,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": [
             "CL01_CreateCluster",
             "CL02_GetCluster",
@@ -3705,8 +3957,8 @@
     ]
   },
   "time": {
-    "from": "now-15m",
-    "to": "now"
+    "from": "2021-08-24T08:49:38.000Z",
+    "to": "2021-08-24T12:20:37.321Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -3736,5 +3988,5 @@
   "timezone": "browser",
   "title": "JMeter Cooper Performance Dashboard",
   "uid": "cyGD20m7k",
-  "version": 67
+  "version": 77
 }
